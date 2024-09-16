@@ -97,14 +97,29 @@ async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
     return user;
   }
 
-  async findAll(page: number = 1, limit: number = 10): Promise<{ users: User[], total: number }> {
-    const [users, total] = await this.userRepository.findAndCount({
-      take: limit,
-      skip: (page - 1) * limit,
-    });
-
+  async findAll(page: number, limit: number, filter?: string): Promise<{ users: User[], total: number }> {
+    const queryBuilder = this.userRepository.createQueryBuilder('user');
+  
+    if (filter) {
+      queryBuilder.where('user.fullName ILIKE :filter', { filter: `%${filter}%` });
+    }
+  
+    const users = await queryBuilder
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getMany();
+  
+    const total = await queryBuilder.getCount();
+  
     return { users, total };
   }
+
+
+
+
+
+
+  
 
   async findByEmailOrRegistration(emailOrRegistration: string): Promise<User> {
     const user = await this.userRepository.findOne({
@@ -155,5 +170,6 @@ async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
     user.password = await this.hashPassword(changePasswordDto.newPassword);
     await this.userRepository.save(user);
   }
+ 
 
 }
