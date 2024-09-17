@@ -9,6 +9,7 @@ import {
   Query,
   UseGuards,
   BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -23,10 +24,10 @@ import { CreateUserDto } from '../dtos/create-user-dto';
 import { UpdateUserDto } from '../dtos/update-user-dto';
 import { User } from '../entities/user.entity';
 import { UserService } from '../services/createUser/user.service';
-import { JwtAuthGuard } from 'src/auth/config/auth-guard';
-import { AuthService } from 'src/auth/services/auth.service';
-import { LoginDto } from 'src/auth/dtos/login-dto';
-import { ForgotPasswordDto } from 'src/auth/dtos/forgot-password-dto';
+import { JwtAuthGuard } from '../../auth/config/auth-guard';
+import { AuthService } from '../../auth/services/auth.service';
+import { LoginDto } from '../../auth/dtos/login-dto';
+import { ForgotPasswordDto } from '../../auth/dtos/forgot-password-dto';
 
 @Controller('users')
 @ApiBearerAuth()
@@ -104,13 +105,17 @@ export class UserController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get(':id')
-  @ApiOperation({ summary: 'Get a user by ID' })
-  @ApiResponse({ status: 200, description: 'The user found', type: User })
-  @ApiResponse({ status: 404, description: 'User not found' })
-  async findById(@Param('id') id: number): Promise<User> {
-    return this.userService.findById(id);
+@Get(':id')
+@ApiOperation({ summary: 'Get a user by ID' })
+@ApiResponse({ status: 200, description: 'The user found', type: User })
+@ApiResponse({ status: 404, description: 'User not found' })
+async findById(@Param('id') id: number): Promise<User> {
+  const user = await this.userService.findById(id);
+  if (!user) {
+    throw new NotFoundException('User not found'); 
   }
+  return user;
+}
 
   @UseGuards(JwtAuthGuard)
   @Put(':id')
