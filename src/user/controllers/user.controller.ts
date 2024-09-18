@@ -140,11 +140,14 @@ async findById(@Param('id') id: number): Promise<User> {
     status: 204,
     description: 'The user has been successfully deleted.',
   })
+
   @ApiResponse({ status: 404, description: 'User not found' })
   async remove(@Param('id') id: number): Promise<void> {
     return this.userService.remove(id);
   }
 
+
+  
   @Post('forgot-password')
   @ApiOperation({ summary: 'Recover password via email' })
   @ApiResponse({ status: 200, description: 'Recovery email sent' })

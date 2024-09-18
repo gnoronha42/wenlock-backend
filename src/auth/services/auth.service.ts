@@ -36,7 +36,7 @@ async sendRecoveryEmail(email: string): Promise<void> {
   }
 
   const recoveryToken = this.jwtService.sign({ email: user.email }, { expiresIn: '1h' });
-  const recoveryLink = `http://yourapp.com/recover-password?token=${recoveryToken}`;
+  const recoveryLink = `http://localhost:3000/recover-password?token=${recoveryToken}`;
 
   await this.mailService.sendMail({
     to: user.email,
